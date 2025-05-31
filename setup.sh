@@ -11,7 +11,7 @@ mkdir -p "$SCPfrm"
 mkdir -p "$SCPinst"
 
 # Descargar el script de Dropbear desde GitHub
-DROPBEAR_URL="https://raw.githubusercontent.com/eze1087/dropbear.sh/refs/heads/main/autodropbear"
+DROPBEAR_URL="https://raw.githubusercontent.com/eze1087/dropbear.sh/refs/heads/main/instalar_dropbear.sh"
 wget -O "$SCRIPT_PATH" "$DROPBEAR_URL"
 chmod +x "$SCRIPT_PATH"
 
