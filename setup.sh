@@ -10,7 +10,7 @@ if ! [[ "$DPORT" =~ ^[0-9]+$ ]] || [ "$DPORT" -lt 1 ] || [ "$DPORT" -gt 65535 ];
 fi
 
 # Descargar el script que contiene fun_dropbear
-wget -O /root/fun_dropbear.sh https://raw.githubusercontent.com/tu-repo/tu-archivo/fun_dropbear.sh
+wget -O /root/fun_dropbear.sh https://raw.githubusercontent.com/eze1087/dropbear.sh/refs/heads/main/instalar_dropbear.sh
 chmod +x /root/fun_dropbear.sh
 
 # Ejecutar la función pasándole el puerto
