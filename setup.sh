@@ -1,47 +1,42 @@
 #!/bin/bash
 
-# Define las rutas
-SCPdir="/etc/VPS-MX"
-SCPfrm="${SCPdir}/herramientas"
-SCPinst="${SCPdir}/protocolos"
-SCRIPT_PATH="/root/dropbear.sh"  # Aquí descargaremos el script de Dropbear
+# Preguntar por el puerto
+read -p "Ingresa el puerto que deseas abrir en Dropbear: " DPORT
 
-# Crear las carpetas si no existen
-mkdir -p "$SCPfrm"
-mkdir -p "$SCPinst"
+# Validar el puerto
+if ! [[ "$DPORT" =~ ^[0-9]+$ ]] || [ "$DPORT" -lt 1 ] || [ "$DPORT" -gt 65535 ]; then
+    echo "Puerto inválido. Se usará el puerto 22 por defecto."
+    DPORT=22
+fi
 
-# Descargar el script de Dropbear desde GitHub
-DROPBEAR_URL="https://raw.githubusercontent.com/eze1087/dropbear.sh/refs/heads/main/instalar_dropbear.sh"
-wget -O "$SCRIPT_PATH" "$DROPBEAR_URL"
-chmod +x "$SCRIPT_PATH"
+# Descargar el script que contiene fun_dropbear
+wget -O /root/fun_dropbear.sh https://raw.githubusercontent.com/tu-repo/tu-archivo/fun_dropbear.sh
+chmod +x /root/fun_dropbear.sh
 
-# Crear el script principal que invocará a dropbear (puedes personalizarlo o llamarlo directamente)
-# Aquí simplemente llamamos al script descargado
-cat <<EOF > /root/execute_dropbear.sh
-#!/bin/bash
-bash "$SCRIPT_PATH"
-EOF
+# Ejecutar la función pasándole el puerto
+bash /root/fun_dropbear.sh "$DPORT"
 
-chmod +x /root/execute_dropbear.sh
-
-# Crear servicio systemd
-cat <<EOF > /etc/systemd/system/dropbear_setup.service
+# Crear servicio systemd para que inicie automáticamente
+cat <<EOF > /etc/systemd/system/dropbear_instalacion.service
 [Unit]
-Description=Iniciar script de configuración Dropbear
+Description=Instalador y configurador Dropbear
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash /root/execute_dropbear.sh
+ExecStart=/bin/bash -c 'bash /root/fun_dropbear.sh "$DPORT"'
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Habilitar y arrancar el servicio
+# Habilitar y arrancar servicio
 systemctl daemon-reload
-systemctl enable dropbear_setup.service
-systemctl start dropbear_setup.service
+systemctl enable dropbear_instalacion.service
+systemctl start dropbear_instalacion.service
 
-echo "Setup completo. Dropbear se descargó, configuró y el servicio está activo para iniciarse automáticamente al reiniciar."
+# Abrir puerto en UFW
+ufw allow "$DPORT"/tcp
+
+echo "Dropbear se configuró en el puerto $DPORT y se iniciará automáticamente al reiniciar."
