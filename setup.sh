@@ -9,34 +9,34 @@ if ! [[ "$DPORT" =~ ^[0-9]+$ ]] || [ "$DPORT" -lt 1 ] || [ "$DPORT" -gt 65535 ];
     DPORT=22
 fi
 
-# Descargar el script que contiene fun_dropbear
-wget -O /root/fun_dropbear.sh https://raw.githubusercontent.com/eze1087/dropbear.sh/refs/heads/main/instalar_dropbear.sh
-chmod +x /root/fun_dropbear.sh
+# Descargar tu script de instalación
+wget -O /root/instalar_dropbear.sh https://raw.githubusercontent.com/eze1087/dropbear.sh/refs/heads/main/instalar_dropbear.sh
+chmod +x /root/instalar_dropbear.sh
 
-# Ejecutar la función pasándole el puerto
-bash /root/fun_dropbear.sh "$DPORT"
+# Ejecutar el script pasando el puerto
+bash /root/instalar_dropbear.sh "$DPORT"
 
-# Crear servicio systemd para que inicie automáticamente
-cat <<EOF > /etc/systemd/system/dropbear_instalacion.service
+# Crear un servicio systemd para que inicie automáticamente después
+cat <<EOF > /etc/systemd/system/dropbear_auto.service
 [Unit]
-Description=Instalador y configurador Dropbear
+Description=Dropbear con puerto personalizado
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash -c 'bash /root/fun_dropbear.sh "$DPORT"'
+ExecStart=/bin/bash -c 'bash /root/instalar_dropbear.sh "$DPORT"'
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Habilitar y arrancar servicio
+# Recargar systemd, habilitar y arrancar
 systemctl daemon-reload
-systemctl enable dropbear_instalacion.service
-systemctl start dropbear_instalacion.service
+systemctl enable dropbear_auto.service
+systemctl start dropbear_auto.service
 
-# Abrir puerto en UFW
+# Abrir el puerto en UFW
 ufw allow "$DPORT"/tcp
 
-echo "Dropbear se configuró en el puerto $DPORT y se iniciará automáticamente al reiniciar."
+echo "Dropbear se configuró en el puerto $DPORT y se iniciará automáticamente en cada reinicio."
